@@ -3,19 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="John Park · English Teacher 개인 홈페이지">
   <title>John Park | English Teacher</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
   <header class="site-header">
     <div class="nav-wrap">
-      <a class="brand" href="index.html">
+      <a class="brand" href="index.html" aria-label="John Park 홈">
         <strong>John Park</strong>
         <span>English Teacher</span>
       </a>
+
       <input class="nav-toggle" id="nav-toggle" type="checkbox">
-      <label class="menu-btn" for="nav-toggle">메뉴</label>
+      <label class="menu-btn" for="nav-toggle" aria-label="메뉴 열기">메뉴</label>
+
       <nav class="site-nav" aria-label="주요 메뉴">
         <ul>
           <li><a href="index.html" aria-current="page">홈</a></li>
@@ -28,26 +33,114 @@
   </header>
 
   <main id="main" class="layout">
+
     <section class="hero">
-      <p class="eyebrow">Personal Homepage</p>
-      <h1>영어교사 John Park</h1>
-      <p class="lead">교실은 실수를 안전하게 연습하는 곳이라고 믿습니다. 학생들이 자신의 목소리로 영어를 말할 수 있도록, 작은 성공을 쌓는 수업을 만듭니다. 문법과 독해를 건너뛰지 않으면서도, 실제 대화에 바로 쓸 수 있는 표현을 함께 다듬습니다.</p>
+      <p class="eyebrow">English Education · Personal Homepage</p>
+
+      <h1>
+        영어를 배우는 일이<br>
+        <em>조금 더 선명해지도록.</em>
+      </h1>
+
+      <p class="lead">
+        안녕하세요. 영어를 가르치는 John Park입니다.
+        학생이 영어를 단순히 외우는 데서 그치지 않고,
+        <strong>자신의 생각을 영어로 이해하고 표현할 수 있도록</strong>
+        돕는 수업을 지향합니다.
+      </p>
+
       <div class="meta">
-        <span class="chip">과목: English</span>
+        <span class="chip">English</span>
+        <span class="chip">Reading</span>
+        <span class="chip">Grammar</span>
       </div>
     </section>
 
     <div class="grid two-col">
+
       <article class="card">
-        <h2>소개</h2>
-        <p>안녕하세요. 영어를 가르치는 John Park입니다. 단어를 외우는 일보다, 그 단어가 필요한 순간을 함께 만드는 일을 좋아합니다.</p>
-        <p>수업에서는 질문하고, 듣고, 다시 말해 보는 리듬을 중요하게 생각합니다. 학생마다 출발점이 다르다는 점을 존중하며, 천천히 그러나 분명하게 실력이 자라도록 돕습니다.</p>
+        <p class="eyebrow">About</p>
+        <h2>학생의 출발점에서 시작합니다.</h2>
+
+        <p>
+          모든 학생이 같은 방식으로 배우지는 않습니다.
+          그래서 수업에서는 정답을 빠르게 맞히는 것보다,
+          <strong>왜 그렇게 이해했는지 설명하고 다시 시도해 보는 과정</strong>을 중요하게 생각합니다.
+        </p>
+
+        <p>
+          단어와 문법은 영어를 이해하기 위한 중요한 도구입니다.
+          하지만 결국 중요한 것은 그것들이 실제 문장과 글 속에서
+          어떻게 사용되는지를 이해하는 것이라고 생각합니다.
+        </p>
       </article>
+
       <article class="card">
-        <h2>이 사이트에서</h2>
-        <p>수업철학, 수업에서 쓰는 자료 안내, 연락처를 모아 두었습니다. 학부모님과 학생 모두 편하게 둘러보시면 좋겠습니다.</p>
+        <p class="eyebrow">Teaching</p>
+        <h2>수업에서 중요하게 생각하는 것</h2>
+
+        <ul class="materials">
+          <li><strong>이해</strong> — 외우기 전에 문장의 의미와 구조를 이해하기</li>
+          <li><strong>연습</strong> — 직접 읽고, 듣고, 말하며 익히기</li>
+          <li><strong>성장</strong> — 작은 성공을 쌓으며 자신감 키우기</li>
+        </ul>
       </article>
+
     </div>
+
+    <section class="grid">
+      <article class="card">
+        <div class="bilingual">
+          <div>
+            <p class="lang-label">English</p>
+            <h2>Learning English should feel meaningful.</h2>
+            <p>
+              I want my students to see English not simply as a subject
+              to memorize, but as a language they can actually understand
+              and use.
+            </p>
+          </div>
+
+          <div>
+            <p class="lang-label">한국어</p>
+            <h2>영어가 실제로 쓰이는 언어라는 것을 경험하도록.</h2>
+            <p>
+              문법과 독해를 탄탄하게 익히면서도,
+              배운 영어가 실제 의미를 만들어 내는 순간을 경험할 수 있는
+              수업을 만들고 싶습니다.
+            </p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid two-col">
+      <article class="card">
+        <p class="eyebrow">Explore</p>
+        <h2>더 알아보기</h2>
+        <p>
+          제가 생각하는 영어교육과 수업에 사용하는 자료를
+          아래 페이지에서 확인할 수 있습니다.
+        </p>
+
+        <div class="meta">
+          <a class="chip" href="philosophy.html">수업철학 →</a>
+          <a class="chip" href="materials.html">수업자료 →</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <p class="eyebrow">Contact</p>
+        <h2>함께 이야기하고 싶다면</h2>
+        <p>
+          수업이나 영어교육에 관해 궁금한 점이 있다면
+          편하게 연락해 주세요.
+        </p>
+
+        <a href="contact.html">연락처 확인하기 →</a>
+      </article>
+    </section>
+
   </main>
 
   <footer class="site-footer">
