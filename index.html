@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 영어 사전 & 번역기</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.5);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between selection:bg-indigo-100 selection:text-indigo-700">
+
+  <!-- Header -->
+  <header class="w-full max-w-4xl mx-auto px-4 py-6 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <div class="p-2 bg-indigo-600 rounded-xl text-white shadow-md shadow-indigo-200">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+      </div>
+      <h1 class="text-xl font-bold text-slate-900 tracking-tight">LexiAI <span class="text-xs font-normal text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Gemini Powered</span></h1>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+      <button id="openSettings" class="flex items-center space-x-1 px-3 py-2 text-sm text-slate-600 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 transition-all duration-200 shadow-sm">
+        <i data-lucide="key" class="w-4 h-4 text-slate-500"></i>
+        <span>API Key</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="w-full max-w-3xl mx-auto px-4 py-8 flex-grow flex flex-col justify-center">
+    
+    <!-- Title & Intro -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
+        실시간 AI 영어 사전 & 번역
+      </h2>
+      <p class="text-slate-500 text-sm sm:text-base">
+        단어를 입력하면 <span class="font-semibold text-slate-700">영영풀이·뜻·예문</span>을, 문장을 입력하면 <span class="font-semibold text-slate-700">자연스러운 번역</span>을 제공합니다.
+      </p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="relative w-full max-w-2xl mx-auto mb-8">
+      <div class="relative flex items-center bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200 p-2 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100 transition-all duration-300">
+        <i data-lucide="search" class="w-6 h-6 text-slate-400 ml-3 shrink-0"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="단어나 문장을 입력하세요 (예: serendipity, Look before you leap)" 
+          class="w-full px-3 py-3 text-slate-800 placeholder-slate-400 bg-transparent text-base sm:text-lg focus:outline-none"
+          autocomplete="off"
+        >
+        <div class="flex items-center space-x-1 mr-1">
+          <button id="micBtn" class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="음성 입력">
+            <i data-lucide="mic" class="w-5 h-5"></i>
+          </button>
+          <button id="searchBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-3 rounded-xl transition-all shadow-md shadow-indigo-200 flex items-center space-x-1 shrink-0">
+            <span>검색</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Chips -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs text-slate-500">
+        <span class="text-slate-400">추천 검색어:</span>
+        <button class="chip px-2.5 py-1 bg-white hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded-full transition-all">meticulous</button>
+        <button class="chip px-2.5 py-1 bg-white hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded-full transition-all">break the ice</button>
+        <button class="chip px-2.5 py-1 bg-white hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded-full transition-all">Actions speak louder than words</button>
+      </div>
+    </div>
+
+    <!-- API Key Notice Banner (Visible if no key saved) -->
+    <div id="noApiKeyBanner" class="hidden max-w-2xl mx-auto mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start space-x-3 text-amber-800 text-sm">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+      <div>
+        <p class="font-semibold">Gemini API 키 설정이 필요합니다.</p>
+        <p class="text-amber-700 text-xs mt-1">무료로 발급받은 Gemini API 키를 등록하면 즉시 이용할 수 있습니다. 상단의 <span class="underline cursor-pointer font-medium" onclick="document.getElementById('openSettings').click()">[API Key]</span> 버튼을 클릭해 등록해 주세요.</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden flex-col items-center justify-center py-12">
+      <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-slate-600 font-medium text-sm animate-pulse">AI가 실시간 분석 중입니다...</p>
+    </div>
+
+    <!-- Result Card -->
+    <div id="resultCard" class="hidden w-full max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6">
+      
+      <!-- Result Header -->
+      <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center space-x-3">
+            <h3 id="resultTitle" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Word/Phrase</h3>
+            <span id="typeBadge" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">Word</span>
+          </div>
+          <p id="phoneticText" class="text-sm text-slate-400 mt-1 font-mono">/ pronunciation /</p>
+        </div>
+        <button id="ttsBtn" class="p-3 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-2xl transition-all shadow-sm" title="발음 듣기">
+          <i data-lucide="volume-2" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- WORD MODE CONTENT -->
+      <div id="wordContent" class="space-y-5">
+        
+        <!-- Korean Meaning -->
+        <div class="bg-indigo-50/60 p-4 rounded-2xl border border-indigo-100/80">
+          <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">한국어 뜻</span>
+          <p id="krMeaning" class="text-lg font-bold text-slate-800"></p>
+        </div>
+
+        <!-- English Definition -->
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">영영 풀이 (English Definition)</span>
+          <p id="enDefinition" class="text-slate-700 leading-relaxed text-sm sm:text-base font-medium"></p>
+        </div>
+
+        <!-- Examples -->
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">예문 (Examples)</span>
+          <div id="examplesList" class="space-y-3">
+            <!-- Dynamic examples -->
+          </div>
+        </div>
+
+        <!-- Synonyms & Antonyms -->
+        <div id="synAntContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="text-xs font-semibold text-slate-400 block mb-1">유의어 (Synonyms)</span>
+            <p id="synonymsText" class="text-xs text-slate-700 font-medium"></p>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="text-xs font-semibold text-slate-400 block mb-1">반의어 (Antonyms)</span>
+            <p id="antonymsText" class="text-xs text-slate-700 font-medium"></p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PHRASE / CLAUSE CONTENT -->
+      <div id="phraseContent" class="hidden space-y-5">
+        
+        <!-- Translation -->
+        <div class="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-100">
+          <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider block mb-1">한국어 자연스러운 해석</span>
+          <p id="phraseTranslation" class="text-lg font-bold text-slate-900 leading-relaxed"></p>
+        </div>
+
+        <!-- Context & Nuance -->
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">맥락 및 뉘앙스 설명</span>
+          <p id="phraseContext" class="text-slate-700 text-sm leading-relaxed"></p>
+        </div>
+
+        <!-- Breakdown / Key Vocabulary -->
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">핵심 어휘 / 표현 분석</span>
+          <div id="breakdownList" class="space-y-2">
+            <!-- Dynamic breakdown items -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-4xl mx-auto px-4 py-6 text-center text-xs text-slate-400 border-t border-slate-200/60 mt-12">
+    <p>Powered by Google Gemini API • Created for Real-time English Learning</p>
+  </footer>
+
+  <!-- API Key Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-200">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 transform scale-95 transition-all duration-200" id="modalContainer">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+          <i data-lucide="key" class="w-5 h-5 text-indigo-600"></i>
+          <span>Gemini API 키 설정</span>
+        </h3>
+        <button id="closeSettings" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-slate-500 text-xs mb-4 leading-relaxed">
+        Google AI Studio에서 무료로 발급받은 API Key를 입력하세요. 입력한 API 키는 본인 브라우저(LocalStorage)에만 정식으로 안전하게 보관됩니다.
+      </p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">API Key</label>
+          <input 
+            type="password" 
+            id="apiKeyInput" 
+            placeholder="AIzaSy..." 
+            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          >
+        </div>
+
+        <div class="flex justify-between items-center text-xs text-indigo-600">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="hover:underline flex items-center space-x-1">
+            <span>무료 API 키 발급받기</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+
+        <div class="pt-2 flex space-x-2">
+          <button id="saveApiKey" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition-all text-sm shadow-md shadow-indigo-100">
+            저장하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // DOM Elements
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const micBtn = document.getElementById('micBtn');
+    const loadingState = document.getElementById('loadingState');
+    const resultCard = document.getElementById('resultCard');
+    const noApiKeyBanner = document.getElementById('noApiKeyBanner');
+
+    const openSettings = document.getElementById('openSettings');
+    const closeSettings = document.getElementById('closeSettings');
+    const settingsModal = document.getElementById('settingsModal');
+    const modalContainer = document.getElementById('modalContainer');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveApiKey = document.getElementById('saveApiKey');
+
+    const resultTitle = document.getElementById('resultTitle');
+    const typeBadge = document.getElementById('typeBadge');
+    const phoneticText = document.getElementById('phoneticText');
+    const ttsBtn = document.getElementById('ttsBtn');
+
+    const wordContent = document.getElementById('wordContent');
+    const krMeaning = document.getElementById('krMeaning');
+    const enDefinition = document.getElementById('enDefinition');
+    const examplesList = document.getElementById('examplesList');
+    const synonymsText = document.getElementById('synonymsText');
+    const antonymsText = document.getElementById('antonymsText');
+
+    const phraseContent = document.getElementById('phraseContent');
+    const phraseTranslation = document.getElementById('phraseTranslation');
+    const phraseContext = document.getElementById('phraseContext');
+    const breakdownList = document.getElementById('breakdownList');
+
+    // App State
+    let apiKey = localStorage.getItem('gemini_api_key') || '';
+    let currentSearchText = '';
+
+    // Check API Key Status on load
+    function updateApiKeyStatus() {
+      if (!apiKey) {
+        noApiKeyBanner.classList.remove('hidden');
+      } else {
+        noApiKeyBanner.classList.add('hidden');
+      }
+    }
+    updateApiKeyStatus();
+
+    // Modal Controls
+    function openModal() {
+      apiKeyInput.value = apiKey;
+      settingsModal.classList.remove('opacity-0', 'pointer-events-none');
+      modalContainer.classList.remove('scale-95');
+    }
+    function closeModal() {
+      settingsModal.classList.add('opacity-0', 'pointer-events-none');
+      modalContainer.classList.add('scale-95');
+    }
+
+    openSettings.addEventListener('click', openModal);
+    closeSettings.addEventListener('click', closeModal);
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) closeModal();
+    });
+
+    saveApiKey.addEventListener('click', () => {
+      const val = apiKeyInput.value.trim();
+      if (!val) {
+        alert('API Key를 입력해주세요.');
+        return;
+      }
+      apiKey = val;
+      localStorage.setItem('gemini_api_key', apiKey);
+      updateApiKeyStatus();
+      closeModal();
+      alert('API Key가 저장되었습니다.');
+    });
+
+    // Quick Chips
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        searchInput.value = chip.textContent.trim();
+        handleSearch();
+      });
+    });
+
+    // Speech Recognition (STT)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      
+      micBtn.addEventListener('click', () => {
+        recognition.start();
+        micBtn.classList.add('text-indigo-600', 'animate-pulse');
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        searchInput.value = transcript;
+        micBtn.classList.remove('text-indigo-600', 'animate-pulse');
+        handleSearch();
+      };
+
+      recognition.onerror = () => {
+        micBtn.classList.remove('text-indigo-600', 'animate-pulse');
+      };
+      recognition.onend = () => {
+        micBtn.classList.remove('text-indigo-600', 'animate-pulse');
+      };
+    } else {
+      micBtn.style.display = 'none';
+    }
+
+    // Speech Synthesis (TTS)
+    ttsBtn.addEventListener('click', () => {
+      if (!currentSearchText) return;
+      const utterance = new SpeechSynthesisUtterance(currentSearchText);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    });
+
+    // Search Action
+    searchBtn.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    // Models Fallback Array
+    const GEMINI_MODELS = [
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
+      'gemini-1.5-pro'
+    ];
+
+    async function callGeminiAPI(promptText) {
+      if (!apiKey) {
+        openModal();
+        throw new Error('API Key가 필요합니다. 상단 API Key 버튼을 통해 입력해주세요.');
+      }
+
+      let lastError = null;
+
+      for (const model of GEMINI_MODELS) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: promptText }]
+              }],
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: 'application/json'
+              }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textResponse) {
+              return JSON.parse(textResponse);
+            }
+          } else {
+            const errJson = await response.json().catch(() => ({}));
+            lastError = errJson.error?.message || response.statusText;
+          }
+        } catch (e) {
+          lastError = e.message;
+        }
+      }
+
+      throw new Error(`Gemini API 호출 실패: ${lastError || '네트워크 오류가 발생했습니다.'}`);
+    }
+
+    async function handleSearch() {
+      const query = searchInput.value.trim();
+      if (!query) return;
+
+      currentSearchText = query;
+      loadingState.classList.remove('hidden');
+      loadingState.classList.add('flex');
+      resultCard.classList.add('hidden');
+
+      const systemPrompt = `
+You are an expert English-Korean dictionary and translator assistant.
+Analyze the user input string: "${query}"
+
+First, classify if it is a single "WORD" or a "PHRASE_CLAUSE".
+
+Return JSON ONLY matching the schema:
+
+For "WORD":
+{
+  "type": "WORD",
+  "phonetic": "[IPA pronunciation or simplified phonetic]",
+  "krMeaning": "한국어 명확한 뜻 (품사 표기 포함, 예: [명] 행복, [동] 찾다)",
+  "enDefinition": "Clear and concise English definition.",
+  "examples": [
+    { "en": "English example sentence 1.", "kr": "한국어 번역 문장 1." },
+    { "en": "English example sentence 2.", "kr": "한국어 번역 문장 2." }
+  ],
+  "synonyms": ["synonym1", "synonym2"],
+  "antonyms": ["antonym1", "antonym2"]
+}
+
+For "PHRASE_CLAUSE":
+{
+  "type": "PHRASE_CLAUSE",
+  "phonetic": "",
+  "krMeaning": "자연스러운 한국어 전체 번역/해석",
+  "context": "문맥, 뉘앙스, 사용 상황에 대한 친절한 설명 (한국어)",
+  "breakdown": [
+    { "expression": "주요 단어/구문 1", "meaning": "뜻 및 설명" },
+    { "expression": "주요 단어/구문 2", "meaning": "뜻 및 설명" }
+  ]
+}
+`;
+
+      try {
+        const data = await callGeminiAPI(systemPrompt);
+        renderResult(query, data);
+      } catch (err) {
+        alert(err.message || '분석 중 오류가 발생했습니다.');
+      } finally {
+        loadingState.classList.add('hidden');
+        loadingState.classList.remove('flex');
+      }
+    }
+
+    function renderResult(query, data) {
+      resultTitle.textContent = query;
+      resultCard.classList.remove('hidden');
+
+      if (data.type === 'WORD') {
+        typeBadge.textContent = '단어 (Word)';
+        typeBadge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100';
+        phoneticText.textContent = data.phonetic || '';
+        phoneticText.style.display = data.phonetic ? 'block' : 'none';
+
+        wordContent.classList.remove('hidden');
+        phraseContent.classList.add('hidden');
+
+        krMeaning.textContent = data.krMeaning || '';
+        enDefinition.textContent = data.enDefinition || '';
+
+        examplesList.innerHTML = '';
+        if (data.examples && data.examples.length > 0) {
+          data.examples.forEach(ex => {
+            const div = document.createElement('div');
+            div.className = 'p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm space-y-1';
+            div.innerHTML = `
+              <p class="font-medium text-slate-800">"${ex.en}"</p>
+              <p class="text-xs text-slate-500">${ex.kr}</p>
+            `;
+            examplesList.appendChild(div);
+          });
+        }
+
+        synonymsText.textContent = data.synonyms && data.synonyms.length ? data.synonyms.join(', ') : '정보 없음';
+        antonymsText.textContent = data.antonyms && data.antonyms.length ? data.antonyms.join(', ') : '정보 없음';
+
+      } else {
+        typeBadge.textContent = '문장/숙어 (Phrase)';
+        typeBadge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100';
+        phoneticText.style.display = 'none';
+
+        wordContent.classList.add('hidden');
+        phraseContent.classList.remove('hidden');
+
+        phraseTranslation.textContent = data.krMeaning || '';
+        phraseContext.textContent = data.context || '특별한 뉘앙스 설명이 없습니다.';
+
+        breakdownList.innerHTML = '';
+        if (data.breakdown && data.breakdown.length > 0) {
+          data.breakdown.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs flex justify-between items-center';
+            div.innerHTML = `
+              <span class="font-bold text-slate-800">${item.expression}</span>
+              <span class="text-slate-600">${item.meaning}</span>
+            `;
+            breakdownList.appendChild(div);
+          });
+        }
+      }
+
+      // Re-initialize icons if needed
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
